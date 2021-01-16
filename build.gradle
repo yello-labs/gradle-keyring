@@ -1,0 +1,85 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id "com.diffplug.spotless" version "5.9.0"
+}
+
+version '0.1.0'
+group 'org.yellolab'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy();
+
+    testImplementation 'junit:junit:4.13'
+}
+
+gradlePlugin {
+    plugins {
+        'gradle-keyring' {
+            id = 'org.yellolab.gradle-keyring'
+            implementationClass = 'org.yellolab.KeyringPlugin'
+        }
+    }
+}
+
+def functionalTest = sourceSets.create('functionalTest')
+gradlePlugin.testSourceSets(functionalTest)
+
+configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
+
+def functionalTestTask = tasks.register('functionalTest', Test) {
+    testClassesDirs = functionalTest.output.classesDirs
+    classpath = configurations[functionalTest.runtimeClasspathConfigurationName] + functionalTest.output
+}
+
+tasks.check.configure {
+    dependsOn(functionalTestTask)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = rootProject.name
+                description = 'Gradle plugin exposing JNI wrapper for the keyring lib in RUST'
+                url = 'https://github.com/yellolab/gradle-keyring'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'bmaulding'
+                        name = 'Dakota Maulding'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/yellolab/gradle-keyring.git'
+                    url = 'https://github.com/yellolab/gradle-keyring'
+                }
+            }
+        }
+    }
+}
+spotless {
+    format 'misc', {
+        // define the files to apply `misc` to
+        target '*.gradle', '*.md', '.gitignore'
+
+        // define the steps to apply to those files
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+    java {
+        googleJavaFormat('1.7')
+    }
+}
