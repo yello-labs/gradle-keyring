@@ -16,6 +16,7 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy();
 
+    implementation 'org.yellolab:keyring:0.1.0'
     testImplementation 'junit:junit:4.13'
 }
 
@@ -69,6 +70,7 @@ publishing {
         }
     }
 }
+
 spotless {
     format 'misc', {
         // define the files to apply `misc` to
