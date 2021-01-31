@@ -33,6 +33,8 @@ gradlePlugin {
         'gradle-keyring' {
             id = 'org.yellolab.gradle-keyring'
             implementationClass = 'org.yellolab.KeyringPlugin'
+            displayName = 'Gradle-Keyring'
+            description = 'Gradle plugin that applies a keyring property to projects/settings for an easy and secure way of managing secrets'
         }
     }
 }
@@ -70,15 +72,4 @@ pluginBundle {
     website = 'https://github.com/yellolab/gradle-keyring'
     vcsUrl = 'https://github.com/yellolab/gradle-keyring.git'
     tags = ['keyring']
-}
-
-gradlePlugin {
-    plugins {
-        keyringLib {
-            id = group + '.' + rootProject.name
-            displayName = 'Gradle-Keyring'
-            description = 'Gradle plugin that applies a keyring property to projects/settings for an easy and secure way of managing secrets'
-            implementationClass = 'org.yellolab.KeyringPlugin'
-        }
-    }
 }
