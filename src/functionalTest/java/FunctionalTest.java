@@ -60,7 +60,8 @@ public class FunctionalTest {
             .forwardOutput()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("build")
+            .withDebug(true)
+            .withArguments("build", "--stacktrace", "-i")
             .build();
   }
 
