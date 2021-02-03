@@ -6,7 +6,7 @@ plugins {
 }
 
 version '0.1.0'
-group 'org.yello.labs'
+group 'org.yello-labs'
 
 repositories {
     mavenCentral()
