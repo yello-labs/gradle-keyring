@@ -6,7 +6,7 @@ plugins {
 }
 
 version '0.1.0'
-group 'org.yellolab'
+group 'org.yello-labs'
 
 repositories {
     mavenCentral()
@@ -23,16 +23,16 @@ dependencies {
     implementation localGroovy();
     implementation 'org.slf4j:slf4j-api:1.7.30'
 
-    implementation 'org.yellolab:keyring:0.1.0'
-    runtimeOnly 'org.yellolab:keyring:0.1.0'
+    implementation 'org.yello-labs:keyring:0.1.0'
+    runtimeOnly 'org.yello-labs:keyring:0.1.0'
     testImplementation 'junit:junit:4.13'
 }
 
 gradlePlugin {
     plugins {
         'gradle-keyring' {
-            id = 'org.yellolab.gradle-keyring'
-            implementationClass = 'org.yellolab.KeyringPlugin'
+            id = 'org.yello-labs.gradle-keyring'
+            implementationClass = 'org.yello-labs.KeyringPlugin'
             displayName = 'Gradle-Keyring'
             description = 'Gradle plugin that applies a keyring property to projects/settings for an easy and secure way of managing secrets'
         }
@@ -69,7 +69,7 @@ spotless {
 }
 
 pluginBundle {
-    website = 'https://github.com/yellolab/gradle-keyring'
-    vcsUrl = 'https://github.com/yellolab/gradle-keyring.git'
+    website = 'https://github.com/yello-labs/gradle-keyring'
+    vcsUrl = 'https://github.com/yello-labs/gradle-keyring.git'
     tags = ['keyring']
 }

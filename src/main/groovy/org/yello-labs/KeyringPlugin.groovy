@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.yellolab.Keyring
+
 /**
  * Implementation of the gradle plugin interface for anything that can call the apply method.
  * Can be used in either the build.gradle or the settings.gradle.
