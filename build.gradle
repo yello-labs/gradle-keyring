@@ -25,7 +25,13 @@ dependencies {
 
     implementation 'org.yello-labs:keyring:0.1.0'
     runtimeOnly 'org.yello-labs:keyring:0.1.0'
-    testImplementation 'junit:junit:4.13'
+
+    testImplementation 'org.testng:testng:6.10'
+}
+
+test {
+    useTestNG()
+    failFast = false
 }
 
 gradlePlugin {
@@ -45,6 +51,8 @@ gradlePlugin.testSourceSets(functionalTest)
 configurations[functionalTest.implementationConfigurationName].extendsFrom(configurations.testImplementation)
 
 def functionalTestTask = tasks.register('functionalTest', Test) {
+    useTestNG()
+    failFast = false
     testClassesDirs = functionalTest.output.classesDirs
     classpath = configurations[functionalTest.runtimeClasspathConfigurationName] + functionalTest.output
 }

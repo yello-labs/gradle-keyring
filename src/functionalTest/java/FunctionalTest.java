@@ -3,14 +3,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 public class FunctionalTest {
   private static final Logger logger = LoggerFactory.getLogger(FunctionalTest.class);
@@ -18,11 +16,12 @@ public class FunctionalTest {
   static String settingsTemplate = "plugins {%s} %s";
   static String buildTemplate = "plugins {%s}  %s";
 
-  @Before
+  @BeforeTest
   public void setUp() throws IOException {
     projectDir.mkdirs();
-    Assume.assumeTrue(projectDir.canRead());
-    Assume.assumeTrue(projectDir.canWrite());
+
+    Assert.assertTrue(projectDir.canRead());
+    Assert.assertTrue(projectDir.canWrite());
     // Everything needs a settings.gradle file.
     writeFile(new File(projectDir, "settings.gradle"), String.format(settingsTemplate, "", ""));
   }
@@ -31,10 +30,10 @@ public class FunctionalTest {
   public void templateTest() {
     String addition = "notinthetemplate";
     String test = String.format(settingsTemplate, addition, "");
-    Assert.assertTrue(test, test.contains(addition));
+    Assert.assertTrue(test.contains(addition), test);
   }
 
-  @Test
+  @Test(dependsOnMethods = {"templateTest"})
   public void testTest() throws IOException {
     writeFile(new File(projectDir, "build.gradle"), String.format(buildTemplate, "", ""));
 
@@ -47,14 +46,16 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(dependsOnMethods = {"testTest"})
   public void applyToProject() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
-            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "KeyringPlugin.setSecret('test', 'test', 'test')"));
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
@@ -65,14 +66,16 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(dependsOnMethods = {"applyToProject"})
   public void applyToSettings() throws IOException {
     writeFile(
         new File(projectDir, "settings.gradle"),
         String.format(
             buildTemplate,
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
-            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "KeyringPlugin.getSecret('test', 'test')"));
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
@@ -82,7 +85,7 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(dependsOnMethods = {"applyToProject"})
   public void setSecret() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
@@ -104,7 +107,7 @@ public class FunctionalTest {
     Assert.assertTrue(true);
   }
 
-  @Test
+  @Test(dependsOnMethods = {"applyToProject"})
   public void getSecret() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
@@ -124,14 +127,18 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(
+      dependsOnMethods = {"applyToProject"},
+      enabled = false)
   public void stringInterpolation() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
-            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "KeyringPlugin.getSecret('test', 'test')"));
     // TODO: Add setting, then getting and comapring with a string known to give java issues
 
     BuildResult result =
@@ -143,14 +150,18 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(
+      dependsOnMethods = {"applyToProject"},
+      enabled = false)
   public void specialCharactersCheck() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
-            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "KeyringPlugin.getSecret('test', 'test')"));
     // TODO: Add setting, then getting and comapring with a string known to give java issues
 
     BuildResult result =
@@ -162,7 +173,7 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(dependsOnMethods = {"applyToProject"})
   public void runtimeMethodCheck() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
@@ -175,7 +186,7 @@ public class FunctionalTest {
                 + "task(\"test\") {\n"
                 + "    "
                 + "doLast {\n"
-                + "        KeyringPlugin.getSecret('','')\n"
+                + "        KeyringPlugin.getSecret('test','test')\n"
                 + "    }\n"
                 + "}"));
 
@@ -188,7 +199,7 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
+  @Test(dependsOnMethods = {"applyToProject"})
   public void methodAvailableEverywhere() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
@@ -197,18 +208,18 @@ public class FunctionalTest {
             "id 'org.yello-labs.gradle-keyring'",
             "  \n"
                 + "import org.yello.labs.KeyringPlugin;\n"
-                + "KeyringPlugin.getSecret('','')\n"
+                + "KeyringPlugin.getSecret('test','test')\n"
                 + "task(\"test\") {\n"
                 + "    doLast {\n"
-                + "        KeyringPlugin.getSecret('','')\n"
+                + "        KeyringPlugin.getSecret('test','test')\n"
                 + "    }\n"
                 + "}\n"
                 + "gradle.afterProject {\n"
-                + "    KeyringPlugin.getSecret('','')\n"
+                + "    KeyringPlugin.getSecret('test','test')\n"
                 + "}\n"
                 + "\n"
                 + "gradle.beforeProject {\n"
-                + "    KeyringPlugin.getSecret('','')\n"
+                + "    KeyringPlugin.getSecret('test','test')\n"
                 + "}"));
 
     BuildResult result =
@@ -220,8 +231,7 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test
-  @Ignore
+  @Test(enabled = false)
   public void applyConfigurations() throws IOException {
     writeFile(new File(projectDir, "build.gradle"), String.format(buildTemplate, "", ""));
 
@@ -234,7 +244,7 @@ public class FunctionalTest {
             .build();
   }
 
-  @After
+  @AfterTest
   public void tearDown() {
     projectDir.delete();
   }
