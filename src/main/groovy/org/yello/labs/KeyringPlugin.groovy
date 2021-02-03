@@ -49,7 +49,11 @@ public class KeyringPlugin implements Plugin {
 
         logger.trace("If you need to debug your output, do it in trace.  Gradle does NOT log trace")
 
-        return Keyring.getSecret(host, userName)
+        if (System.getenv().hasProperty(host + "_" + userName)) {
+            return System.getenv(host + "_" + userName)
+        } else {
+            return Keyring.getSecret(host, userName)
+        }
     }
 
     /**

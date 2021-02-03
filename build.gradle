@@ -6,7 +6,7 @@ plugins {
 }
 
 version '0.1.0'
-group 'org.yello.labs'
+group 'org.yello-labs'
 
 repositories {
     mavenCentral()
@@ -34,16 +34,7 @@ test {
     failFast = false
 }
 
-gradlePlugin {
-    plugins {
-        'gradle-keyring' {
-            id = 'org.yello-labs.gradle-keyring'
-            implementationClass = 'org.yello.labs.KeyringPlugin'
-            displayName = 'Gradle-Keyring'
-            description = 'Gradle plugin that applies a keyring property to projects/settings for an easy and secure way of managing secrets'
-        }
-    }
-}
+
 
 def functionalTest = sourceSets.create('functionalTest')
 gradlePlugin.testSourceSets(functionalTest)
@@ -73,6 +64,17 @@ spotless {
     }
     java {
         googleJavaFormat('1.7')
+    }
+}
+
+gradlePlugin {
+    plugins {
+        keyring {
+            id = 'org.yello-labs.gradle-keyring'
+            displayName = 'Gradle-Keyring'
+            description = 'Gradle plugin that applies a keyring property to projects/settings for an easy and secure way of managing secrets'
+            implementationClass = 'org.yello.labs.KeyringPlugin'
+        }
     }
 }
 
