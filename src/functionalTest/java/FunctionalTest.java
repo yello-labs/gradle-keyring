@@ -53,8 +53,8 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
-            "\n" + "import org.yellolab.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
@@ -70,8 +70,8 @@ public class FunctionalTest {
         new File(projectDir, "settings.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
-            "\n" + "import org.yellolab.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
@@ -87,9 +87,9 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
             "\n"
-                + "import org.yellolab.KeyringPlugin;\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
                 + "def added = KeyringPlugin.setSecret('', "
                 + "'', '')"));
 
@@ -109,9 +109,9 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
             "\n"
-                + "import org.yellolab.KeyringPlugin;\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
                 + "final String pass = KeyringPlugin"
                 + ".getSecret('', '')"));
     BuildResult result =
@@ -129,8 +129,8 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
-            "\n" + "import org.yellolab.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
     // TODO: Add setting, then getting and comapring with a string known to give java issues
 
     BuildResult result =
@@ -148,8 +148,8 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
-            "\n" + "import org.yellolab.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n" + "import org.yello.labs.KeyringPlugin;\n" + "KeyringPlugin.getSecret('', '')"));
     // TODO: Add setting, then getting and comapring with a string known to give java issues
 
     BuildResult result =
@@ -167,9 +167,9 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab" + ".gradle" + "-keyring'",
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
             "  \n"
-                + "import org.yellolab.KeyringPlugin;\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
                 + "\n"
                 + "task(\"test\") {\n"
                 + "    "
@@ -193,9 +193,9 @@ public class FunctionalTest {
         new File(projectDir, "build.gradle"),
         String.format(
             buildTemplate,
-            "id 'org.yellolab.gradle-keyring'",
+            "id 'org.yello-labs.gradle-keyring'",
             "  \n"
-                + "import org.yellolab.KeyringPlugin;\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
                 + "KeyringPlugin.getSecret('','')\n"
                 + "task(\"test\") {\n"
                 + "    doLast {\n"

@@ -6,7 +6,7 @@ plugins {
 }
 
 version '0.1.0'
-group 'org.yello-labs'
+group 'org.yello.labs'
 
 repositories {
     mavenCentral()
@@ -32,7 +32,7 @@ gradlePlugin {
     plugins {
         'gradle-keyring' {
             id = 'org.yello-labs.gradle-keyring'
-            implementationClass = 'org.yello-labs.KeyringPlugin'
+            implementationClass = 'org.yello.labs.KeyringPlugin'
             displayName = 'Gradle-Keyring'
             description = 'Gradle plugin that applies a keyring property to projects/settings for an easy and secure way of managing secrets'
         }

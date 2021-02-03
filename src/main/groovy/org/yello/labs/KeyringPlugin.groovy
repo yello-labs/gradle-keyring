@@ -1,4 +1,4 @@
-package org.yellolab
+package org.yello.labs
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
