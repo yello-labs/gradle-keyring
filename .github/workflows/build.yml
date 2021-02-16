@@ -26,4 +26,10 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --stacktrace
+    - name: Archive Test Report
+      uses: actions/upload-artifact@v2
+      with:
+        name: gradle-test-report
+        path: ./build/reports/tests/test/*
+      if: ${{ failure() }}
