@@ -34,7 +34,7 @@ public class FunctionalTest {
   }
 
   @Test(dependsOnMethods = {"templateTest"})
-  public void testTest() throws IOException {
+  public void functionalTestTest() throws IOException {
     writeFile(new File(projectDir, "build.gradle"), String.format(buildTemplate, "", ""));
 
     BuildResult result =
@@ -46,7 +46,7 @@ public class FunctionalTest {
             .build();
   }
 
-  @Test(dependsOnMethods = {"testTest"})
+  @Test(dependsOnMethods = {"functionalTestTest"})
   public void applyToProject() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
@@ -94,8 +94,7 @@ public class FunctionalTest {
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
             "\n"
                 + "import org.yello.labs.KeyringPlugin;\n"
-                + "def added = KeyringPlugin.setSecret('', "
-                + "'', '')"));
+                + "def added = KeyringPlugin.setSecret('domain', 'username', 'P@sSw0Rd')"));
 
     BuildResult result =
         GradleRunner.create()
@@ -107,7 +106,7 @@ public class FunctionalTest {
     Assert.assertTrue(true);
   }
 
-  @Test(dependsOnMethods = {"applyToProject"})
+  @Test(dependsOnMethods = {"setSecret"})
   public void getSecret() throws IOException {
     writeFile(
         new File(projectDir, "build.gradle"),
@@ -117,7 +116,8 @@ public class FunctionalTest {
             "\n"
                 + "import org.yello.labs.KeyringPlugin;\n"
                 + "final String pass = KeyringPlugin"
-                + ".getSecret('', '')"));
+                + ".getSecret('domain', 'username') \n"
+                + "println(pass)"));  //Dont ever do this though, please
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
@@ -125,6 +125,7 @@ public class FunctionalTest {
             .withProjectDir(projectDir)
             .withArguments("build")
             .build();
+    Assert.assertTrue(result.getOutput().contains("P@sSw0Rd"), result.getOutput());
   }
 
   @Test(
