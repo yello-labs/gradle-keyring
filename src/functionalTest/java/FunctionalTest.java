@@ -106,6 +106,36 @@ public class FunctionalTest {
     Assert.assertTrue(true);
   }
 
+  @Test()
+  public void sourceFromEnv() throws IOException {
+    String password = "secret";
+    writeFile(
+        new File(projectDir, "build.gradle"),
+        String.format(
+            buildTemplate,
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "def pass = KeyringPlugin.getSecret('httpsgoogleorg', 'SomethingPlausible')\n"
+                + "println(pass)"));
+    File dotenv = new File(projectDir, ".env");
+
+    // TODO: Get input, none of this is ideal
+    FileOutputStream a = new FileOutputStream(dotenv);
+    a.write(("httpsgoogleorg_SomethingPlausible=" + password).getBytes());
+    a.close();
+
+    BuildResult result =
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withDebug(true)
+            .withProjectDir(projectDir)
+            .withArguments("build", "-Porg.yello.labs.env")
+            .build();
+    Assert.assertTrue(result.getOutput().contains(password));
+  }
+
   @Test(dependsOnMethods = {"setSecret"})
   public void getSecret() throws IOException {
     writeFile(

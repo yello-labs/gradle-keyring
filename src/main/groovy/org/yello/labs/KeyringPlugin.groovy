@@ -1,5 +1,6 @@
 package org.yello.labs
 
+import io.github.cdimascio.dotenv.Dotenv
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
@@ -20,7 +21,8 @@ import org.slf4j.LoggerFactory
 
 public class KeyringPlugin implements Plugin {
     private static final Logger logger = LoggerFactory.getLogger(KeyringPlugin.class);
-
+    private static boolean sourceFromEnv;
+    private static Dotenv dotenv;
     @Override
     void apply(Object parent) {
         KeyringPlugin Keyring = new KeyringPlugin()
@@ -35,6 +37,12 @@ public class KeyringPlugin implements Plugin {
             settings.ext.keyring = Keyring
         }
 
+        sourceFromEnv = parent.hasProperty(Const.SOURCE_ENV_KEY)
+        if(sourceFromEnv){
+            logger.info('Configuring Dotenv to source from directory {}', parent['rootDir'])
+            dotenv = Dotenv.configure().directory(parent['rootDir'].toString()).load()
+        }
+
     }
 
     /**
@@ -45,12 +53,13 @@ public class KeyringPlugin implements Plugin {
      * @return the String value returned from the Keyring library
      */
     public static String getSecret(String host, String userName) {
-        logger.info("Retrieving secret")
+        logger.info('Retrieving secret')
 
-        logger.trace("If you need to debug your output, do it in trace.  Gradle does NOT log trace")
+        logger.debug('If you need to debug your output, do it in trace.  Gradle does NOT log trace')
 
-        if (System.getenv().hasProperty(host + "_" + userName)) {
-            return System.getenv(host + "_" + userName)
+        if (sourceFromEnv) {
+            logger.info("Sourcing secret information from .env")
+            return dotenv.get(host+"_"+userName)
         } else {
             return Keyring.getSecret(host, userName)
         }
@@ -67,6 +76,9 @@ public class KeyringPlugin implements Plugin {
     public static boolean setSecret(String host, String userName, String secret) {
         logger.info("Setting secret")
 
+        if (sourceFromEnv){
+            logger.warn("Cannot set password in .env, you must maintain that file.")
+        }
         Keyring.setSecret(host, userName, secret)
 
         logger.trace("If you need to debug your output, do it in trace.  Gradle does NOT log trace")
@@ -89,5 +101,9 @@ public class KeyringPlugin implements Plugin {
         logger.trace("If you need to debug your output, do it in trace.  Gradle does NOT log trace")
 
         return true;
+    }
+
+    static boolean isSourceFromEnv(){
+        return sourceFromEnv
     }
 }

@@ -23,8 +23,9 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy();
     implementation 'org.slf4j:slf4j-api:1.7.30'
-
+    implementation 'io.github.cdimascio:dotenv-java:2.2.0'
     implementation 'gradle.plugin.org.yello-labs:keyring:0.1.0'
+
     runtimeOnly 'gradle.plugin.org.yello-labs:keyring:0.1.0'
 
     testImplementation 'org.testng:testng:6.10'
@@ -34,8 +35,6 @@ test {
     useTestNG()
     failFast = false
 }
-
-
 
 def functionalTest = sourceSets.create('functionalTest')
 gradlePlugin.testSourceSets(functionalTest)
