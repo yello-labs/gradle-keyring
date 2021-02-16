@@ -117,7 +117,7 @@ public class FunctionalTest {
                 + "import org.yello.labs.KeyringPlugin;\n"
                 + "final String pass = KeyringPlugin"
                 + ".getSecret('domain', 'username') \n"
-                + "println(pass)"));  //Dont ever do this though, please
+                + "println(pass)")); // Dont ever do this though, please
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
