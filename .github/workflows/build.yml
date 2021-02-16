@@ -31,5 +31,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: gradle-test-report
-        path: ./build/reports/tests/test/*
+        path: ./build/reports//tests/functionalTest/*
       if: ${{ failure() }}
