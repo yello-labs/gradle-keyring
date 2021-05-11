@@ -36,7 +36,8 @@ jobs:
   publish:
     runs-on: windows-latest
     strategy:
-      java: [ 1.8 ]
+      matrix:
+        java: [ 1.8 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK ${{  matrix.java  }}
