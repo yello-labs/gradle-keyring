@@ -1,14 +1,17 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FunctionalTest {
   private static final Logger logger = LoggerFactory.getLogger(FunctionalTest.class);
@@ -16,7 +19,7 @@ public class FunctionalTest {
   static String settingsTemplate = "plugins {%s} %s";
   static String buildTemplate = "plugins {%s}  %s";
 
-  @BeforeTest
+  @BeforeMethod
   public void setUp() throws IOException {
     projectDir.mkdirs();
 
@@ -43,6 +46,7 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
@@ -82,6 +86,7 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
@@ -94,7 +99,7 @@ public class FunctionalTest {
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
             "\n"
                 + "import org.yello.labs.KeyringPlugin;\n"
-                + "def added = KeyringPlugin.setSecret('domain', 'username', 'P@sSw0Rd')"));
+                + "def added = KeyringPlugin.setSecret('https://realistic.domain', 'username', 'P@sSw0Rd')"));
 
     BuildResult result =
         GradleRunner.create()
@@ -102,13 +107,15 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
     Assert.assertTrue(true);
   }
 
   @Test()
   public void sourceFromEnv() throws IOException {
-    String password = "secret";
+    // Value in env is fine for any character it seems
+    String password = "R@ac:;:;;:\\/fda";
     writeFile(
         new File(projectDir, "build.gradle"),
         String.format(
@@ -116,13 +123,13 @@ public class FunctionalTest {
             "id 'org.yello-labs" + ".gradle" + "-keyring'",
             "\n"
                 + "import org.yello.labs.KeyringPlugin;\n"
-                + "def pass = KeyringPlugin.getSecret('httpsgoogleorg', 'SomethingPlausible')\n"
-                + "println(pass)"));
+                + "def pass = KeyringPlugin.getSecret('https://realistic.domain', 'Something.Plausible')\n"
+                + "println(\"Password Found: \" + pass)"));
     File dotenv = new File(projectDir, ".env");
 
-    // TODO: Get input, none of this is ideal
+    // TODO: Make this my problem, not yours.
     FileOutputStream a = new FileOutputStream(dotenv);
-    a.write(("httpsgoogleorg_SomethingPlausible=" + password).getBytes());
+    a.write(("aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu_Something.Plausible=" + password).getBytes());
     a.close();
 
     BuildResult result =
@@ -136,6 +143,68 @@ public class FunctionalTest {
     Assert.assertTrue(result.getOutput().contains(password));
   }
 
+  @Test()
+  public void simpleSourceFromEnv() throws IOException {
+    // Value in env is fine for any character it seems
+    String password = "R@ac:;:;;:\\/fda";
+    writeFile(
+        new File(projectDir, "build.gradle"),
+        String.format(
+            buildTemplate,
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "def pass = KeyringPlugin.getSecret('localhost', 'Something.Plausible')\n"
+                + "println(\"Password Found: \" + pass)"));
+    File dotenv = new File(projectDir, ".env");
+
+    // TODO: Make this my problem, not yours.
+    FileOutputStream a = new FileOutputStream(dotenv);
+    a.write(("localhost_Something.Plausible=" + password).getBytes());
+    a.close();
+
+    BuildResult result =
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withDebug(true)
+            .withProjectDir(projectDir)
+            .withArguments("build", "-Porg.yello.labs.env")
+            .build();
+    Assert.assertTrue(result.getOutput().contains(password));
+  }
+
+  @Test()
+  public void testErrorHandlingDotenv() throws IOException {
+    // Value in env is fine for any character it seems
+    String password = "R@ac:;:;;:\\/fda";
+    writeFile(
+        new File(projectDir, "build.gradle"),
+        String.format(
+            buildTemplate,
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "def pass = KeyringPlugin.getSecret('https://google.com', 'Something.Plausible')\n"
+                + "println(\"Password Found: \" + pass)"));
+    File dotenv = new File(projectDir, ".env");
+
+    // TODO: Make this my problem, not yours.
+    FileOutputStream a = new FileOutputStream(dotenv);
+    a.write(("https://google.com.Plausible=" + password).getBytes());
+    a.close();
+
+    BuildResult result =
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withDebug(true)
+            .withProjectDir(projectDir)
+            .withArguments("build", "-Porg.yello.labs.env")
+            .buildAndFail();
+    Assert.assertTrue(result.getOutput().contains("base64"));
+  }
+
   @Test(dependsOnMethods = {"setSecret"})
   public void getSecret() throws IOException {
     writeFile(
@@ -146,7 +215,7 @@ public class FunctionalTest {
             "\n"
                 + "import org.yello.labs.KeyringPlugin;\n"
                 + "final String pass = KeyringPlugin"
-                + ".getSecret('domain', 'username') \n"
+                + ".getSecret('https://realistic.domain', 'username') \n"
                 + "println(pass)")); // Dont ever do this though, please
     BuildResult result =
         GradleRunner.create()
@@ -154,8 +223,45 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
     Assert.assertTrue(result.getOutput().contains("P@sSw0Rd"), result.getOutput());
+  }
+
+  @Test(dependsOnMethods = {"setSecret"})
+  public void getSecretFromEnv() throws IOException {
+    writeFile(
+        new File(projectDir, "build.gradle"),
+        String.format(
+            buildTemplate,
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "final String pass = KeyringPlugin"
+                + ".getSecret('https://realistic.domain', 'Something.Plausible') \n"
+                + "println(\"Password Found: \" + pass)")); // Dont ever do this though, please
+
+    new File(projectDir, ".env").delete();
+    String password = "R@ac:;:;;:\\/fda";
+
+    Map<String, String> environment = new HashMap<>();
+    environment.put("ORG_YELLO_LABS_ENV", "true");
+    environment.put("aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu_Something.Plausible", password);
+  
+    //    TODO: Find a way to make this work in modern shells and I'll owe you one
+    //    environment.put("https://realistic.domain_Something.Plausible", password);
+    
+    
+    BuildResult result =
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withEnvironment(environment)
+            .withArguments("build", "-Porg.yello.labs.env=true")
+            .build();
+
+    Assert.assertTrue(result.getOutput().contains(password), result.getOutput());
   }
 
   @Test(
@@ -178,6 +284,7 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
@@ -201,6 +308,7 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
@@ -227,6 +335,7 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
@@ -259,6 +368,7 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
@@ -272,10 +382,11 @@ public class FunctionalTest {
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("build")
+            .withDebug(true)
             .build();
   }
 
-  @AfterTest
+  @AfterMethod
   public void tearDown() {
     projectDir.delete();
   }

@@ -1,11 +1,14 @@
 package org.yello.labs
 
 import io.github.cdimascio.dotenv.Dotenv
+import io.github.cdimascio.dotenv.DotenvException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import java.nio.charset.Charset
 
 /**
  * Implementation of the gradle plugin interface for anything that can call the apply method.
@@ -40,8 +43,16 @@ public class KeyringPlugin implements Plugin {
         sourceFromEnv = parent.hasProperty(Const.SOURCE_ENV_KEY)
         if(sourceFromEnv){
             logger.info('Configuring Dotenv to source from directory {}', parent['rootDir'])
-            dotenv = Dotenv.configure().directory(parent['rootDir'].toString()).load()
+            try {
+                dotenv = Dotenv.configure().ignoreIfMissing().directory(parent['rootDir'].toString()).load()
+            } catch(DotenvException e) {
+                if (e.getMessage().contains("Malformed entry")) {
+                    throw new IllegalArgumentException("Failed to load .env file due to malformed entry, try base64 encoding the hostname (echo -n <hostname> | base64) and readd to the .env file")
+                }
+                throw e;
+            }
         }
+
 
     }
 
@@ -59,7 +70,14 @@ public class KeyringPlugin implements Plugin {
 
         if (sourceFromEnv) {
             logger.info("Sourcing secret information from .env")
-            return dotenv.get(host+"_"+userName)
+            String pass = dotenv.get(host + "_" + userName)
+            if (pass != null) {
+                return pass
+            }
+
+            //TODO: This is not ideal... it's not human readable for simple debugging
+            String encodedUsername = Base64.encoder.encodeToString(host.getBytes(Charset.defaultCharset()));
+            return dotenv.get(encodedUsername+"_"+userName)
         } else {
             return Keyring.getSecret(host, userName)
         }
@@ -94,7 +112,7 @@ public class KeyringPlugin implements Plugin {
      * @return boolean to be interpreted as success performing action
      */
     public static boolean deleteSecret(String host, String userName) {
-        logger.info("Setting secret")
+        logger.info("Deleting secret")
 
         Keyring.deleteSecret(host, userName)
 
