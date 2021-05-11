@@ -25,8 +25,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build -d
-
+        run: ./gradlew build --stacktrace --info
+      - name: Archive Test Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: gradle-test-report
+          path: ./build/reports//tests/functionalTest/*
+        if: ${{ failure() }}
+    
   publish:
     runs-on: windows-latest
     steps:
