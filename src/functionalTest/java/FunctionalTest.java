@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.slf4j.Logger;
@@ -6,12 +11,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FunctionalTest {
   private static final Logger logger = LoggerFactory.getLogger(FunctionalTest.class);
@@ -247,11 +246,10 @@ public class FunctionalTest {
     Map<String, String> environment = new HashMap<>();
     environment.put("ORG_YELLO_LABS_ENV", "true");
     environment.put("aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu_Something.Plausible", password);
-  
+
     //    TODO: Find a way to make this work in modern shells and I'll owe you one
     //    environment.put("https://realistic.domain_Something.Plausible", password);
-    
-    
+
     BuildResult result =
         GradleRunner.create()
             .forwardOutput()
