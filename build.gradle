@@ -5,7 +5,7 @@ plugins {
     id "com.gradle.plugin-publish" version "0.12.0"
 }
 
-version '0.1.2'
+version '0.1.3'
 group 'org.yello-labs'
 
 repositories {
@@ -21,7 +21,7 @@ java {
 
 dependencies {
     implementation gradleApi()
-    implementation localGroovy();
+    implementation localGroovy()
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'io.github.cdimascio:dotenv-java:2.2.0'
     implementation 'gradle.plugin.org.yello-labs:keyring:0.1.0'
