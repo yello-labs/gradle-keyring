@@ -128,7 +128,7 @@ public class FunctionalTest {
 
     // TODO: Make this my problem, not yours.
     FileOutputStream a = new FileOutputStream(dotenv);
-    a.write(("aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu_Something.Plausible=" + password).getBytes());
+    a.write(("aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu__--__Something.Plausible=" + password).getBytes());
     a.close();
 
     BuildResult result =
@@ -159,7 +159,7 @@ public class FunctionalTest {
 
     // TODO: Make this my problem, not yours.
     FileOutputStream a = new FileOutputStream(dotenv);
-    a.write(("localhost_Something.Plausible=" + password).getBytes());
+    a.write(("localhost__--__Something.Plausible=" + password).getBytes());
     a.close();
 
     BuildResult result =
@@ -237,7 +237,7 @@ public class FunctionalTest {
             "\n"
                 + "import org.yello.labs.KeyringPlugin;\n"
                 + "final String pass = KeyringPlugin"
-                + ".getSecret('https://realistic.domain', 'Something.Plausible') \n"
+                + ".getSecret('https://realistic.domain', 'Something.Plausible@mailg.moc') \n"
                 + "println(\"Password Found: \" + pass)")); // Dont ever do this though, please
 
     new File(projectDir, ".env").delete();
@@ -245,7 +245,43 @@ public class FunctionalTest {
 
     Map<String, String> environment = new HashMap<>();
     environment.put("ORG_YELLO_LABS_ENV", "true");
-    environment.put("aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu_Something.Plausible", password);
+    environment.put(
+        "aHR0cHM6Ly9yZWFsaXN0aWMuZG9tYWlu__--__Something.Plausible@mailg.moc", password);
+
+    //    TODO: Find a way to make this work in modern shells and I'll owe you one
+    //    environment.put("https://realistic.domain_Something.Plausible", password);
+
+    BuildResult result =
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withEnvironment(environment)
+            .withArguments("build", "-Porg.yello.labs.env=true")
+            .build();
+
+    Assert.assertTrue(result.getOutput().contains(password), result.getOutput());
+  }
+
+  @Test(dependsOnMethods = {"setSecret"})
+  public void getSecretFromEnvWithoutEncoding() throws IOException {
+    writeFile(
+        new File(projectDir, "build.gradle"),
+        String.format(
+            buildTemplate,
+            "id 'org.yello-labs" + ".gradle" + "-keyring'",
+            "\n"
+                + "import org.yello.labs.KeyringPlugin;\n"
+                + "final String pass = KeyringPlugin"
+                + ".getSecret('https://realistic.domain', 'Something.Plausible@mailg.moc') \n"
+                + "println(\"Password Found: \" + pass)")); // Dont ever do this though, please
+
+    new File(projectDir, ".env").delete();
+    String password = "R@ac:;:;;:\\/fda";
+
+    Map<String, String> environment = new HashMap<>();
+    environment.put("ORG_YELLO_LABS_ENV", "true");
+    environment.put("https://realistic.domain__--__Something.Plausible@mailg.moc", password);
 
     //    TODO: Find a way to make this work in modern shells and I'll owe you one
     //    environment.put("https://realistic.domain_Something.Plausible", password);
