@@ -75,8 +75,8 @@ class KeyringPlugin implements Plugin {
             }
 
             //TODO: This is not ideal... it's not human readable for simple debugging
-            String encodedUsername = Base64.encoder.encodeToString(host.getBytes(Charset.defaultCharset()))
-            return dotenv.get(encodedUsername + Const.DELIMITER + userName).replace("=", "");
+            String encodedUsername = Base64.encoder.encodeToString(host.getBytes(Charset.defaultCharset())).replace("=", "")
+            return dotenv.get(encodedUsername + Const.DELIMITER + userName)
         } else {
             return Keyring.getSecret(host, userName)
         }
